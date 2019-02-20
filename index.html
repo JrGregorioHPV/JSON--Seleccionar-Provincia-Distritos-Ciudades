@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Seleccionar Provincias-Distritos-Ciudades - JSON - MySQL</title>
+	<link rel="stylesheet" href="">
+	<script src="jquery-3.3.1.min.js"></script>
+</head>
+<style>
+	body{background: #666;}
+	.main {max-width: 500px; margin: 50px auto;, border:1px solid #e5e5e5; background-color: #e5e5e5; padding: 20px; }
+	select {width: 300px;}
+</style>
+<body>
+
+	<div class="main">
+		<h1>JSON</h1>
+		<form>
+			<p>Provincia:
+			<select id="Provincias" onchange="">
+				<option>--- Seleccione su provincia ---</option>
+			</select>
+			</p>
+			<p>Distrito:
+			<select id="Distritos"></select>
+			</p>
+			<p>Ciudad:
+			<select id="Ciudades"></select>
+			</p>
+
+		</form>
+	</div>
+
+	<script>
+		$(document).ready(function() {
+
+			txt_Distrito = '--- Seleccione su Distrito ---';
+			txt_Ciudad = '--- Seleccione su Ciudad ---';
+
+			mostrar_Provincias();
+
+		$('#Distritos').attr('disabled', true);
+		$('#Ciudades').attr('disabled', true);
+		
+
+		$('#Provincias').change(function() {
+			$('#Distritos').empty()
+				.attr('disabled', false)
+				.html('<option value="">'+txt_Distrito+'</option>');
+			selectDitritos();
+			 //mostrar_Distritos();
+		});
+
+		$('#Distritos').change(function() {
+			$('#Ciudades').empty()
+				.attr('disabled', false)
+				.html('<option value="">'+txt_Ciudad+'</option>');
+			selectCiudades();
+		});
+		});
+
+		function selectDitritos() {
+			//var dist = $('#Provincias');
+			var dist = $('#Provincias').val();
+
+			//var Resultado = mostrar_Distritos(dist.val());
+			var Resultado = mostrar_Distritos('04');
+
+			if (Resultado.lenght > 0 ) {
+				console.log(Resultado);
+				$('#Distritos').html(Resultado);
+			} else {
+				console.log('No hay nada de distrito');
+			}
+		}
+
+		function selectCiudades() {
+			var Ciudad = $('#Distritos');
+			var Resultado = mostrar_Ciudades(Ciudad.val());
+
+			if (Resultado.lenght > 0 && Resultado != undefined) {
+				console.log(Resultado);
+				$('#Ciudades').html(Resultado);
+			} else {
+				console.log('No hay nada');
+			}
+		}
+
+		function mostrar_Provincias(data) {
+			var Resultados = '';
+
+			$.get('php/provincia.php', function (data) {		
+
+			$(data).each(function (row) {
+				var ID_Provincia = data[row].IDP;
+				var Provincia = data[row].PROVINCIA;
+
+				Resultados = '<option value="'+ID_Provincia+'">'+Provincia+'</option>';
+				console.log(Provincia);
+
+				$('#Provincias').append(Resultados);
+			});
+		}, 'json');
+		}
+
+		function mostrar_Distritos(data_Distrito) {
+			var Resultado = '';		
+
+			$.get('php/distrito.php', function (data) {
+				
+				$(data).each(function(row) {
+					var Distrito_ID  = data[row].IDD;
+					var Provincia_ID = data[row].IDP;
+					var Distrito 	 = data[row].DISTRITO;
+
+					if (data_Distrito == Provincia_ID) {
+						Resultado = '<option value="'+Distrito_ID+'">'+Distrito+'</option>';
+
+						$('#Distritos').append(Resultado);
+						console.log(Resultado);
+					}
+				});
+			}, 'json');
+			return Resultado;
+			}
+
+			function mostrar_Ciudades(data_Ciudad) {
+			var resultado = '';
+			//$('#Ciudades').empty();
+
+			$.get('php/ciudades.php', function (data) {
+				
+				$(data).each(function(row) {
+					var Ciudad_ID = data[row].IDC;
+					var Distrito_ID = data[row].IDD;
+					var Ciudad = data[row].CIUDAD;
+
+					if (data_Ciudad == Distrito_ID) {
+						resultado = '<option value="'+Ciudad_ID+'">'+Ciudad+'</option>';
+
+						$('#Ciudades').append(resultado);
+						console.log(resultado);
+					}
+				});
+			}, 'json');
+			return resultado;
+			}
+		
+	</script>
+	
+</body>
+</html>
